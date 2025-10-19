@@ -124,19 +124,19 @@ typedef struct Motor_RM_struct_t
 	
     Motor_RM_Rx_Info_t* rx_info;
 	
-		Motor_RM_Tx_Info_t* tx_info;
+	Motor_RM_Tx_Info_t* tx_info;
 
     Motor_RM_State_t* state;
 	
-		Motor_RM_Ctrl_Info_t* ctrl;
+	Motor_RM_Ctrl_Info_t* ctrl;
 	
-		void (*single_set_torque)(struct Motor_RM_struct_t *motor);
+	void (*single_set_torque)(struct Motor_RM_struct_t *motor);
 	
-		void (*single_set_speed)(struct Motor_RM_struct_t *motor);
+	void (*single_set_speed)(struct Motor_RM_struct_t *motor);
 	
-		void (*single_set_angle)(struct Motor_RM_struct_t *motor);
+	void (*single_set_angle)(struct Motor_RM_struct_t *motor);
 	
-	  void (*rx)(struct Motor_RM_struct_t *motor, uint8_t *rxBuf);
+	 void (*rx)(struct Motor_RM_struct_t *motor, uint8_t *rxBuf);
 	
 	  void (*single_sleep)(struct Motor_RM_struct_t *motor);
 	

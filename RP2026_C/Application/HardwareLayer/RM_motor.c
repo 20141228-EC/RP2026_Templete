@@ -131,7 +131,6 @@ static void Motor_Set_Angle(Motor_RM_t *motor)
 	motor->tx_info->torque = my_speed_ctrl->out;
 }
 
-
 /**
  * @brief  电机心跳失联检测
  * @param  motor: 电机结构体
