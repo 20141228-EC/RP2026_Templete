@@ -33,7 +33,7 @@ imu_info_t imu_info =
 {
 	.offset_info.gx_offset = 0.f,
 	.offset_info.gy_offset = 0.f,
-	.offset_info.gz_offset = 0.f,
+	.offset_info.gz_offset = -0.0012f,
 	.init_flag = 0,
 };
 

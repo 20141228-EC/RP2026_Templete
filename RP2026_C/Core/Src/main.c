@@ -206,18 +206,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	static uint16_t i = 0;
 	if (htim->Instance == TIM4)
 	{
-		if (i++ == 60000)
-		{
-			i = 0;
-		}
-		
-		if ((imu_sensor.work_state.err_code == IMU_NONE_ERR) || \
-				(imu_sensor.work_state.err_code == IMU_DATA_CALI))
-		{
-			imu_sensor.update(&imu_sensor);
-			
-		}
-		
+	
 	}
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM2)

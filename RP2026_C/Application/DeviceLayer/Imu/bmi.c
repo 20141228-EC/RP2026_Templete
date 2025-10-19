@@ -53,7 +53,7 @@ gimbal_transform_t gim_trans = {
 bmi_t bmi = {
     .Kp = 0.125f,//初始化的时候kp可以大一点，后面稳定了就把kp给小
     .norm = 0.0f,
-    .halfT = 0.00025f,
+    .halfT = 0.0005f,
     .gx = 0.0f, .gy = 0.0f, .gz = 0.0f,
     .ax = 0.0f, .ay = 0.0f, .az = 0.0f,
     .vx = 0.0f, .vy = 0.0f, .vz = 0.0f,
