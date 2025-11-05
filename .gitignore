@@ -20,7 +20,6 @@
 *.log
 *.bak
 *.htm
-*.sct
 *.iex
 
 # 调试器相关文件
@@ -42,3 +41,4 @@ Release/
 *~
 .vscode/
 .idea/
+*.uvguix.*

@@ -19,8 +19,7 @@ void StartControlTask(void const * argument)
 			
 		}
 		
-		Yaw_Motor.tx_info->torque = t;
-		Yaw_Motor.single_set_torque(&Yaw_Motor);
+		
 		osDelay(1);
 	}
 }

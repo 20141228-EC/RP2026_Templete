@@ -14,10 +14,9 @@
 void imu_init(imu_sensor_t *self);
 void imu_heart_beat(work_state_t *heart);
 void imu_update(imu_sensor_t *self);
-//void imu_set_temperature(imu_sensor_t *self, float temp);
+void imu_set_temperature(imu_sensor_t *self, float temp);
 #if IMU_USE_EKF == 1
 static void InitQuaternion(float *init_q4);
-static float Sqrt(float x);
 #endif //IMU_USE_EKF
 /* Private typedef -----------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -33,7 +32,7 @@ imu_info_t imu_info =
 {
 	.offset_info.gx_offset = 0.f,
 	.offset_info.gy_offset = 0.f,
-	.offset_info.gz_offset = -0.0012f,
+	.offset_info.gz_offset = 0.f,
 	.init_flag = 0,
 };
 
@@ -52,7 +51,7 @@ imu_sensor_t imu_sensor = {
 	.init = &imu_init,
 	.update = &imu_update,
     .heart_beat = &imu_heart_beat,
-//    .set_temperature = &imu_set_temperature,
+    .set_temperature = &imu_set_temperature,
 };
 
 /* Private functions ---------------------------------------------------------*/
@@ -100,10 +99,10 @@ void imu_init(struct imu_struct *self)
 		// float init_quaternion[4] = {0.999019921, -0.0315267481, -0.0310692526};
 		float init_quaternion[4] = {0};
 		InitQuaternion(init_quaternion);
-		IMU_QuaternionEKF_Init(init_quaternion, 15, 0.001, 100000, 1);
+		IMU_QuaternionEKF_Init(init_quaternion, 10, 0.001, 8000000, 1);
 #endif //IMU_USE_EKF
 		
-		self->work_state.err_code = IMU_NONE_ERR;
+		self->work_state.err_code = IMU_DATA_CALI;//开启陀螺仪校正使用IMU_DATA_CALI，关闭使用IMU_NONE_ERR
 		imu_sensor.info->offset_info.gx_offset = 0.f;
 		imu_sensor.info->offset_info.gy_offset = 0.f;
 		imu_sensor.info->offset_info.gz_offset = 0.f;
@@ -141,19 +140,19 @@ void imu_heart_beat(work_state_t *heart)
 /**
  * @brief  imu设置温度
  */
-//void imu_set_temperature(imu_sensor_t *self, float temp)
-//{
-//    self->temp_pid->err = temp - imu_info.base_info.temperature;
-//    single_pid_ctrl(self->temp_pid);
-//	/* 温度异常值保护 */
-//    if(imu_info.base_info.temperature > 50 || imu_info.base_info.temperature < 0
-//       || self->temp_pid->out < 0)
-//    {
-//        self->temp_pid->out = 0;
-//    }
+void imu_set_temperature(imu_sensor_t *self, float temp)
+{
+//	self->temp_pid->err = temp - imu_info.base_info.temperature;
+//	single_pid_ctrl(self->temp_pid);
+///* 温度异常值保护 */
+//	if(imu_info.base_info.temperature > 50 || imu_info.base_info.temperature < 0
+//		 || self->temp_pid->out < 0)
+//	{
+//			self->temp_pid->out = 0;
+//	}
 
-//    IMU_Set_PWM(self->temp_pid->out);
-//}
+//	IMU_Set_PWM(self->temp_pid->out);
+}
 
 ave_filter_t imu_pitch_dif_speed_ave_filter;
 ave_filter_t imu_roll_dif_speed_ave_filter;
@@ -205,21 +204,29 @@ void imu_update(imu_sensor_t *imu_sen)
 			imu_cnt = 0;
 			imu_sen->work_state.err_code = IMU_NONE_ERR;
 			
-			if (abs(imu_info->offset_info.gx_offset) > 5.f)
+			if (abs(imu_info->offset_info.gx_offset) > 0.005f)
 				imu_info->offset_info.gx_offset = 0;
-			if (abs(imu_info->offset_info.gy_offset) > 5.f)
+			if (abs(imu_info->offset_info.gy_offset) > 0.005f)
 				imu_info->offset_info.gy_offset = 0;
-			if (abs(imu_info->offset_info.gz_offset) > 5.f)
+			if (abs(imu_info->offset_info.gz_offset) > 0.005f)
 				imu_info->offset_info.gz_offset = 0;
 			imu_sen->work_state.cali_end = 1;
 		}
 	}
 	else
 	{
-		gyrox += imu_info->offset_info.gx_offset;
-		gyroy += imu_info->offset_info.gy_offset;
-		gyroz += imu_info->offset_info.gz_offset;
+#if IMU_USE_EKF == 1
+
+			gyroz += imu_info->offset_info.gz_offset;//只对gyroz作修正，x，y的角速度已经在解算过程中完成了校正
+#endif
+
+#if IMU_USE_MAHONY == 1
+			gyrox += imu_info->offset_info.gx_offset;
+			gyroy += imu_info->offset_info.gy_offset;
+			gyroz += imu_info->offset_info.gz_offset;
+#endif
 	}
+	
 	
 	/* 原始数据低通滤波 */
 	gyrox_ = Lowpass(gyrox_, gyrox, 1);
@@ -237,16 +244,18 @@ void imu_update(imu_sensor_t *imu_sen)
 #endif
 
 #if IMU_USE_EKF == 1
-	// TODO: ins 替换为 imu
-	// 采样时间
-	imu_tick_now = micros();
-	if(imu_tick_last == 0) // 第一次特殊处理
-	{
-		imu_tick_last = imu_tick_now - 1000; // 间隔1ms
-	}
-	imu_dt = (imu_tick_now - imu_tick_last) * 0.000001f; // us to s
-	imu_tick_last = imu_tick_now;
-
+	// 计算采样时间
+		imu_tick_now = micros();
+		if(imu_tick_last == 0) // 第一次特殊处理
+		{
+			imu_tick_last = imu_tick_now - 1000; // 间隔1ms
+		}
+		imu_dt = (imu_tick_now - imu_tick_last) * 0.000001f; // us to s
+		imu_tick_last = imu_tick_now;
+		if(imu_dt > 1)//防止系统定时器发癫计算出很大的值
+		{
+			imu_dt = 0.001f;
+		}
     // 核心函数,EKF更新四元数
     IMU_QuaternionEKF_Update(gyrox, gyroy, gyroz, accx, accy, accz, imu_dt);
 
@@ -299,12 +308,12 @@ void imu_update(imu_sensor_t *imu_sen)
 static void InitQuaternion(float *init_q4)
 {
     float acc_sum[3] = {0};
-	float gyro[3], acc_init[3], temp;
+	float gyro_init[3], acc_init[3];
 
     // 读取100次加速度计数据,取平均值作为初始值
     for (uint8_t i = 0; i < 100; ++i)
     {
-        BMI088_read(gyro, acc_init, &temp);
+				BMI088_read(gyro_init, acc_init, &temp);
         acc_sum[0] += acc_init[0];
         acc_sum[1] += acc_init[1];
         acc_sum[2] += acc_init[2];
@@ -312,44 +321,18 @@ static void InitQuaternion(float *init_q4)
     }
     for (uint8_t i = 0; i < 3; ++i)
         acc_init[i] = acc_sum[i]/100;
-		float pitch = atan2(-acc_init[0], Sqrt(acc_init[1] * acc_init[1] + acc_init[2] * acc_init[2]));
-		float roll = atan2(acc_init[1], acc_init[2]);
+		float pitch, roll, temp;
+		arm_sqrt_f32(acc_init[1] * acc_init[1] + acc_init[2] * acc_init[2], &temp);
+		arm_atan2_f32(-acc_init[0], temp, &pitch);
+		arm_atan2_f32(acc_init[1], acc_init[2], &roll);
 		
 		float half_pitch = pitch / 2.0f;
     float half_roll = roll / 2.0f;
 
-    init_q4[0] = cos(half_pitch) * cos(half_roll);
-    init_q4[1] = sin(half_pitch) * cos(half_roll);
-    init_q4[2] = cos(half_pitch) * sin(half_roll);
-    init_q4[3] = sin(half_pitch) * sin(half_roll);
+    init_q4[0] = arm_cos_f32(half_pitch) * arm_cos_f32(half_roll);
+    init_q4[1] = arm_sin_f32(half_pitch) * arm_cos_f32(half_roll);
+    init_q4[2] = arm_cos_f32(half_pitch) * arm_sin_f32(half_roll);
+    init_q4[3] = arm_sin_f32(half_pitch) * arm_sin_f32(half_roll);
 }
-
-// 快速开方
-static float Sqrt(float x)
-{
-    float y;
-    float delta;
-    float maxError;
-
-    if (x <= 0)
-    {
-        return 0;
-    }
-
-    // initial guess
-    y = x / 2;
-
-    // refine
-    maxError = x * 0.001f;
-
-    do
-    {
-        delta = (y * y) - x;
-        y -= delta / (2 * y);
-    } while (delta > maxError || delta < -maxError);
-
-    return y;
-}
-
 
 #endif //IMU_USE_EKF

@@ -13,7 +13,7 @@
 
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
-//#define IMU_Set_PWM(x) TIM10_Set_PWM(x) 
+//#define IMU_Set_PWM(x) TIM3_Set_PWM(x) 
 /* Exported types ------------------------------------------------------------*/
 typedef enum{
   IMU_NONE_ERR,
