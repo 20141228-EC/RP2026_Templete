@@ -20,7 +20,6 @@
 *.log
 *.bak
 *.htm
-*.sct
 *.iex
 
 # 调试器相关文件
@@ -40,5 +39,3 @@ Release/
 # 编辑器/IDE 临时文件
 *.swp
 *~
-.vscode/
-.idea/
