@@ -4,9 +4,11 @@
 
 #include "cmsis_os.h"
 #include "device.h"
+#include "buzzer.h"
 
 extern IWDG_HandleTypeDef hiwdg;
 void StartMonitorTask(void const * argument);
 
 
 #endif
+
