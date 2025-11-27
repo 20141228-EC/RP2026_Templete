@@ -1,12 +1,13 @@
 #ifndef __BUZZER_H
 #define __BUZZER_H
 
-#include "stm32f4xx_hal.h"
-#include "rp_math.h"
-#include "drv_tim.h"
+#include "tim.h"
 /* Private function prototypes -----------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 typedef struct buzzer_config_struct {
+	TIM_HandleTypeDef* tim;
+	uint32_t channel;
+	
 	uint32_t max_tim_arr;
 	uint32_t tim_freq;
 	
@@ -35,7 +36,8 @@ typedef struct buzzer_status_struct {
 	uint16_t tim_presc;
 	float duty;
   	uint16_t CCR;
-	uint16_t AAR;
+	float ARR_raw;
+	uint16_t ARR;
 }buzzer_base_info_t;
 
 typedef struct buzzer_struct

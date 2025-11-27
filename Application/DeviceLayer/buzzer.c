@@ -1,4 +1,6 @@
 #include "buzzer.h"
+
+#define constrain(x, min, max) ((x > max) ? max : (x < min ? min : x))	
 void Buzzer_init(buzzer_t* buzzer);
 void Buzzer_Work(buzzer_t* buzzer);
 buzzer_t buzzer={
@@ -13,6 +15,9 @@ buzzer_t buzzer={
  */
 void Buzzer_init(buzzer_t* buzzer)
 {
+	buzzer->config.tim=&htim4;
+	buzzer->config.channel=TIM_CHANNEL_3;
+	
 	buzzer->config.max_tim_arr=65535;
 	buzzer->config.tim_freq=84000000;
 	buzzer->config.min_pwm_duty=0;
@@ -37,8 +42,8 @@ static uint16_t Buzzer_Calc_Optimal_Presc(buzzer_t* buzzer, float buzzer_freq)
     uint16_t max_arr = buzzer->config.max_tim_arr;
 
     // 公式推导：tim_presc = (tim_freq / (buzzer_freq * (max_arr + 1))) - 1
-    // 确保 ARR = tim_freq/(buzzer_freq*(tim_presc+1)) -1 ≤ max_arr
-    float presc_float = (tim_freq / (buzzer_freq * (max_arr + 1))) - 1.0f;
+    // 此处向上取整，将"-1"舍去，相当于分频增加
+    float presc_float = (tim_freq / (buzzer_freq * (max_arr + 1))) ;
 
     // 限制分频系数范围（PSC 是 16 位寄存器，0~65535）
     uint16_t presc = (uint16_t)constrain(presc_float, 0.0f, 65535.0f);
@@ -59,10 +64,10 @@ static uint16_t Buzzer_Calc_ARR(buzzer_t* buzzer)
 	float arr_float= buzzer->config.tim_freq/
 					(buzzer->base_info.input_info.freq)/
 					(buzzer->base_info.tim_presc+1.f)-1.f;
-	
+	buzzer->base_info.ARR_raw=arr_float;
 	// 限制ARR范围，避免异常值
     return (uint16_t)constrain(arr_float, 0.0f, (float)buzzer->config.max_tim_arr);
-	 //return (uint16_t)arr_float;
+
 }
 
 /**
@@ -71,8 +76,8 @@ static uint16_t Buzzer_Calc_ARR(buzzer_t* buzzer)
 static uint16_t Buzzer_Calc_CCR(buzzer_t* buzzer)
 {
 	return (uint16_t)constrain(
-        buzzer->base_info.duty * buzzer->base_info.AAR,
-        0.0f, (float)buzzer->base_info.AAR
+        buzzer->base_info.duty * buzzer->base_info.ARR,
+        0.0f, (float)buzzer->base_info.ARR
     );
 }
 
@@ -100,14 +105,14 @@ void Buzzer_Work(buzzer_t* buzzer)
         return;
     }
     buzzer->base_info.tim_presc = Buzzer_Calc_Optimal_Presc(buzzer, target_freq);
-    buzzer->base_info.AAR = Buzzer_Calc_ARR(buzzer);
+    buzzer->base_info.ARR = Buzzer_Calc_ARR(buzzer);
     buzzer->base_info.duty = Buzzer_Volume_to_Duty(buzzer, target_volume);
 
     buzzer->base_info.CCR = Buzzer_Calc_CCR(buzzer);
 
-    __HAL_TIM_PRESCALER(&htim4, buzzer->base_info.tim_presc);  // 先设分频（频率相关）
-    __HAL_TIM_SET_AUTORELOAD(&htim4, buzzer->base_info.AAR);   // 再设ARR（频率相关）
-    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, buzzer->base_info.CCR); // 最后设CCR（音量相关）
+    __HAL_TIM_PRESCALER(buzzer->config.tim, 	 buzzer->base_info.tim_presc);  // 先设分频（频率相关）
+    __HAL_TIM_SET_AUTORELOAD(buzzer->config.tim, buzzer->base_info.ARR);   // 再设ARR（频率相关）
+    __HAL_TIM_SET_COMPARE(buzzer->config.tim,buzzer->config.channel , buzzer->base_info.CCR); // 最后设CCR（音量相关）
     
 
 }
