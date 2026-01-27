@@ -17,10 +17,10 @@ drv_judge_info_t drv_judge_info = {
 	.frame_header = &judge_frame_header,
 };
 
-void USART1_rxDataHandler(uint8_t *rxBuf)
-{
-	judge_recive(rxBuf);
-}
+//void USART1_rxDataHandler(uint8_t *rxBuf)
+//{
+//	judge_recive(rxBuf);
+//}
 
 void judge_recive(uint8_t *rxBuf)
 {
