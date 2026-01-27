@@ -16,6 +16,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "driver.h"
 #include "WL_debug_uart.h"
+#include "board_protocol.h"
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -31,4 +32,5 @@ void DRIVER_Init(void)
 	CAN1_Filter_Init();
 	CAN2_Filter_Init();
 	CAN3_Filter_Init();
+	board_test_init();
 }

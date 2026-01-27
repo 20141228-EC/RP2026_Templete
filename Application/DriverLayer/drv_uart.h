@@ -25,10 +25,10 @@
 void DRV_UART_IRQHandler(UART_HandleTypeDef *huart);
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
 void USART1_Init(void);
-void USART2_Init(void);
-void USART3_Init(void);
 void USART5_Init(void);
-void USART6_Init(void);
+void USART3_Init(void);
+void USART7_Init(void);
+void USART10_Init(void);
 void WL_UART_printf(char *format, ...);
 #define USART1_RX_BUF_LEN     400
 #endif
