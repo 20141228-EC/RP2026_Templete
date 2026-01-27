@@ -362,7 +362,7 @@
             </VariousControls>
           </Aads>
           <LDads>
-            <umfTarg>0</umfTarg>
+            <umfTarg>1</umfTarg>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
             <noStLib>0</noStLib>
@@ -1368,16 +1368,6 @@
               <FileName>judge_protocol.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\ProtocolLayer\judge_protocol.c</FilePath>
-            </File>
-            <File>
-              <FileName>board_protocol.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\ProtocolLayer\board_protocol.c</FilePath>
-            </File>
-            <File>
-              <FileName>board_protocol.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Application\ProtocolLayer\board_protocol.h</FilePath>
             </File>
           </Files>
         </Group>

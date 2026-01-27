@@ -344,7 +344,7 @@ void USART1_IRQHandler(void)
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
-
+	DRV_UART_IRQHandler(&huart1);
   /* USER CODE END USART1_IRQn 1 */
 }
 
@@ -415,7 +415,7 @@ void UART7_IRQHandler(void)
   /* USER CODE END UART7_IRQn 0 */
   HAL_UART_IRQHandler(&huart7);
   /* USER CODE BEGIN UART7_IRQn 1 */
-
+	DRV_UART_IRQHandler(&huart7);
   /* USER CODE END UART7_IRQn 1 */
 }
 

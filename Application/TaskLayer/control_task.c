@@ -7,7 +7,6 @@
 #include "control_task.h"
 #include "gimbal_motor.h"
 #include "Judge.h"
-#include "board_protocol.h"
 
 void StartCtrlTask(void const * argument)
 {
@@ -19,7 +18,6 @@ void StartCtrlTask(void const * argument)
 		Yaw_Motor.single_set_torque(&Yaw_Motor);
 //	Back_Group.group_set_torque(&Back_Group);
 //	Front_Group.group_set_torque(&Front_Group);
-		board_send();
 		osDelay(1);
 	}
 }
