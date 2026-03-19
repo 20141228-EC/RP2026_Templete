@@ -18,8 +18,6 @@ void StartCtrlTask(void const * argument)
 		Yaw_Motor.single_set_torque(&Yaw_Motor);
 //	Back_Group.group_set_torque(&Back_Group);
 //	Front_Group.group_set_torque(&Front_Group);
-
 		osDelay(1);
-	  
 	}
 }
