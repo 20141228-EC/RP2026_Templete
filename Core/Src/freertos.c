@@ -79,7 +79,7 @@ const osThreadAttr_t UpdataTask_attributes = {
 osThreadId_t UITaskHandle;
 const osThreadAttr_t UITask_attributes = {
   .name = "UITask",
-  .stack_size = 256 * 4,
+  .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityBelowNormal,
 };
 
