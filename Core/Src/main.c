@@ -115,6 +115,8 @@ int main(void)
   MX_UART5_Init();
   MX_UART7_Init();
   MX_USART1_UART_Init();
+  MX_UART8_Init();
+  MX_UART9_Init();
   /* USER CODE BEGIN 2 */
 	/*CubeMX�����ʼ��UART5Ҫ��SPI2��ң�ز�������ʹ�ã���Ҫʹ��D-Cache*/
 	DEVICE_Init();
