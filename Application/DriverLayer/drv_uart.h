@@ -37,4 +37,10 @@ void WL_UART_printf(char *format, ...);
 #define USART8_RX_BUF_LEN     400
 #define USART9_RX_BUF_LEN     400
 #define USART10_RX_BUF_LEN     400
+
+/* 1: use HAL_UARTEx_ReceiveToIdle_DMA for RC UART5, 0: use legacy double-buffer DMA */
+#ifndef UART5_RC_USE_HAL_TOIDLE_DMA
+#define UART5_RC_USE_HAL_TOIDLE_DMA  1
+#endif
+
 #endif

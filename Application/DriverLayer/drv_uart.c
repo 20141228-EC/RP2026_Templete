@@ -50,6 +50,7 @@ static HAL_StatusTypeDef DMA_Start(DMA_HandleTypeDef *hdma, \
 static void dma_m0_rxcplt_callback(DMA_HandleTypeDef *hdma);
 static void dma_m1_rxcplt_callback(DMA_HandleTypeDef *hdma);
 static void uart_rx_idle_callback(UART_HandleTypeDef* huart);
+static void uart5_rc_start_receive(void);
 static HAL_StatusTypeDef DMAEx_MultiBufferStart_NoIT(DMA_HandleTypeDef *hdma, \
                                                     uint32_t SrcAddress, \
                                                     uint32_t DstAddress, \
@@ -63,7 +64,11 @@ __attribute__((section (".AXI_SRAM"))) uint8_t usart10_dma_rxbuf[USART10_RX_BUF_
 __attribute__((section (".AXI_SRAM"))) uint8_t usart7_dma_rxbuf[USART7_RX_BUF_LEN];
 __attribute__((section (".AXI_SRAM"))) uint8_t usart8_dma_rxbuf[USART8_RX_BUF_LEN];
 __attribute__((section (".AXI_SRAM"))) uint8_t usart9_dma_rxbuf[USART9_RX_BUF_LEN];
+#if UART5_RC_USE_HAL_TOIDLE_DMA
+__attribute__((section (".AXI_SRAM"))) uint8_t usart5_dma_rxbuf[USART5_RX_BUF_LEN];
+#else
 __attribute__((section (".AXI_SRAM"))) uint8_t usart5_dma_rxbuf[2][USART5_RX_BUF_LEN];
+#endif
 
 /* Exported variables --------------------------------------------------------*/
 
@@ -72,6 +77,16 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef * huart, uint16_t Size)
 {
 	if(huart->Instance == UART5)
 	{
+#if UART5_RC_USE_HAL_TOIDLE_DMA
+		if(HAL_UARTEx_GetRxEventType(huart) == HAL_UART_RXEVENT_IDLE)
+		{
+			if(Size == USART5_RX_DATA_FRAME_LEN)
+			{
+				USART5_rxDataHandler(usart5_dma_rxbuf);
+			}
+			uart5_rc_start_receive();
+		}
+#else
 		if(((((DMA_Stream_TypeDef  *)huart->hdmarx->Instance)->CR) & DMA_SxCR_CT ) == RESET) 
 		{ 
 			__HAL_DMA_DISABLE(huart->hdmarx); 
@@ -98,8 +113,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef * huart, uint16_t Size)
 			USART5_rxDataHandler(usart5_dma_rxbuf[1]); 
 			} 		 
 		}							   
+#endif
 	}
-										  
+
+#if !UART5_RC_USE_HAL_TOIDLE_DMA
 	huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
 	
 	/* Enalbe IDLE interrupt */
@@ -109,7 +126,18 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef * huart, uint16_t Size)
   SET_BIT(huart->Instance->CR3, USART_CR3_DMAR);
 	
 	__HAL_DMA_ENABLE(huart->hdmarx);
+#endif
 }
+
+#if UART5_RC_USE_HAL_TOIDLE_DMA
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+	if(huart->Instance == UART5)
+	{
+		uart5_rc_start_receive();
+	}
+}
+#endif
 
 static void USART_DMAEx_MultiBuffer_Init(UART_HandleTypeDef *huart, uint32_t *DstAddress, uint32_t *SecondMemAddress, uint32_t DataLength)
 {
@@ -146,8 +174,12 @@ __HAL_DMA_ENABLE(huart->hdmarx);
 
 void USART5_Init(void)
 {
+#if UART5_RC_USE_HAL_TOIDLE_DMA
+	uart5_rc_start_receive();
+#else
 	USART_DMAEx_MultiBuffer_Init(&huart5, (uint32_t*)&usart5_dma_rxbuf[0], \
 							    (uint32_t*)&usart5_dma_rxbuf[1], USART5_RX_BUF_LEN); // 接收完毕后重启
+#endif
 }
 
 /**
@@ -279,6 +311,16 @@ static void uart_rx_idle_callback(UART_HandleTypeDef* huart)
 		/* restart dma transmission */	  
 		__HAL_DMA_ENABLE(huart->hdmarx);		
 	}
+}
+
+static void uart5_rc_start_receive(void)
+{
+#if UART5_RC_USE_HAL_TOIDLE_DMA
+	HAL_UART_DMAStop(&huart5);
+	__HAL_UART_CLEAR_FLAG(&huart5, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_PEF | UART_CLEAR_FEF | UART_CLEAR_IDLEF);
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart5, usart5_dma_rxbuf, USART5_RX_BUF_LEN);
+	__HAL_DMA_DISABLE_IT(huart5.hdmarx, DMA_IT_HT);
+#endif
 }
 
 
