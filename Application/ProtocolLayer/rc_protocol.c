@@ -110,6 +110,10 @@ void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf)
 
 	rc_info->thumbwheel.value = ((int16_t)rxBuf[16] | ((int16_t)rxBuf[17] << 8)) & 0x07ff;
 	rc_info->thumbwheel.value -= 1024;
+	if(abs(rc_info->thumbwheel.value)>660)
+	{
+		rc_info->thumbwheel.value=0;
+	}
 
 	rc_info->s1 = ((rxBuf[5] >> 4) & 0x000C) >> 2;
 	rc_info->s2 = (rxBuf[5] >> 4) & 0x0003;	
