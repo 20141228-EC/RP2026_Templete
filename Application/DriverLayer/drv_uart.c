@@ -29,7 +29,7 @@ extern UART_HandleTypeDef huart6;
 #define USART3_RX_DATA_FRAME_LEN	(18u)	// 数据帧长度
 #define USART3_RX_BUF_LEN			(USART3_RX_DATA_FRAME_LEN + 6u)	// 接收缓冲区长度
 
-#define USART1_RX_BUF_LEN     100
+
 #define USART6_RX_BUF_LEN	  100	//200
 
 /* Private function prototypes -----------------------------------------------*/
@@ -116,6 +116,7 @@ static void uart_rx_idle_callback(UART_HandleTypeDef* huart)
 		/* handle dbus data dbus_buf from DMA */
 		USART1_rxDataHandler(usart1_dma_rxbuf);
 		memset(usart1_dma_rxbuf, 0, USART1_RX_BUF_LEN);  //清空串口DMA缓冲区
+		__HAL_DMA_SET_COUNTER(huart->hdmarx, USART1_RX_BUF_LEN); /*imu_xrobot 让DMA重置时重置计数器*/
 		/* restart dma transmission */	  
 		__HAL_DMA_ENABLE(huart->hdmarx);
 	}
