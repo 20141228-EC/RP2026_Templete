@@ -33,8 +33,8 @@ void USART9_Init(void);
 void USART10_Init(void);
 void WL_UART_printf(char *format, ...);
 #define USART1_RX_BUF_LEN     400
-#define USART7_RX_BUF_LEN     400
-#define USART8_RX_BUF_LEN     400
+#define USART7_RX_BUF_LEN     128  /* imu_xrobot需要对应数据长度的倍数*/
+#define USART8_RX_BUF_LEN     400  
 #define USART9_RX_BUF_LEN     400
 #define USART10_RX_BUF_LEN     400
 

@@ -21,6 +21,7 @@ void DEVICE_Init(void)
 {
 	dev_list.rc_sen->init(dev_list.rc_sen);
 	imu_sensor.init(&imu_sensor);
+	IMU_UART_Init();
 //	
 	/*电机初始化*/
 	Front_Group.group_init(&Front_Group);

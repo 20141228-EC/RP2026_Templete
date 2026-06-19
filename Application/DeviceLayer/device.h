@@ -11,6 +11,7 @@
 #include "cap.h"
 #include "gimbal_motor.h"
 #include "Chassis_Motor.h"
+#include "imu_xrobot.h"
 /* Exported macro ------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 typedef struct dev_list_struct 
