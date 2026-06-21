@@ -28,8 +28,8 @@ extern UART_HandleTypeDef huart9;
 extern UART_HandleTypeDef huart10;
 
 /* Private macro -------------------------------------------------------------*/
-#define USART5_RX_DATA_FRAME_LEN	(18u)	// ´®¿Ú2Êı¾İÖ¡³¤¶È
-#define USART5_RX_BUF_LEN			(USART5_RX_DATA_FRAME_LEN)	// ´®¿Ú2½ÓÊÕ»º³åÇø³¤¶È
+#define USART5_RX_DATA_FRAME_LEN	(18u)	// ä¸²å£2æ•°æ®å¸§é•¿åº¦
+#define USART5_RX_BUF_LEN			(USART5_RX_DATA_FRAME_LEN)	// ä¸²å£2æ¥æ”¶ç¼“å†²åŒºé•¿åº¦
 
 
 //#define USART5_RX_BUF_LEN	  600	//200
@@ -147,28 +147,28 @@ static void USART_DMAEx_MultiBuffer_Init(UART_HandleTypeDef *huart, uint32_t *Ds
 
  huart->RxXferSize    = DataLength*2;
  
-	/*Ê¹ÄÜ´®¿ÚDMAÄ£Ê½*/
+	/*ä½¿èƒ½ä¸²å£DMAæ¨¡å¼*/
  SET_BIT(huart->Instance->CR3,USART_CR3_DMAR);
 
-	/*Ê¹ÄÜuartÖĞ¶Ï*/
+	/*ä½¿èƒ½uartä¸­æ–­*/
  __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE); 
  
-	/*¹Ø±ÕDMA´«Êä£¬È·±£¿ÉÒÔÉèÖÃDMAÆğµãºÍÖÕµã*/
+	/*å…³é—­DMAä¼ è¾“ï¼Œç¡®ä¿å¯ä»¥è®¾ç½®DMAèµ·ç‚¹å’Œç»ˆç‚¹*/
 do{
       __HAL_DMA_DISABLE(huart->hdmarx);
   }while(((DMA_Stream_TypeDef  *)huart->hdmarx->Instance)->CR & DMA_SxCR_EN);
 
-	/*ÅäÖÃDMAÆğµãµØÖ·ºÍÖÕµãµØÖ·*/
+	/*é…ç½®DMAèµ·ç‚¹åœ°å€å’Œç»ˆç‚¹åœ°å€*/
 ((DMA_Stream_TypeDef  *)huart->hdmarx->Instance)->PAR = (uint32_t)&huart->Instance->RDR;
 ((DMA_Stream_TypeDef  *)huart->hdmarx->Instance)->M0AR = (uint32_t)DstAddress;
 ((DMA_Stream_TypeDef  *)huart->hdmarx->Instance)->M1AR = (uint32_t)SecondMemAddress;
 
-	/*ÅäÖÃDMAÊı¾İ´«Êä³¤¶È*/
+	/*é…ç½®DMAæ•°æ®ä¼ è¾“é•¿åº¦*/
 ((DMA_Stream_TypeDef  *)huart->hdmarx->Instance)->NDTR = DataLength;
 
 SET_BIT(((DMA_Stream_TypeDef  *)huart->hdmarx->Instance)->CR, DMA_SxCR_DBM);
 
-	/*Ê¹ÄÜDMA*/
+	/*ä½¿èƒ½DMA*/
 __HAL_DMA_ENABLE(huart->hdmarx);	
 }
 
@@ -178,7 +178,7 @@ void USART5_Init(void)
 	uart5_rc_start_receive();
 #else
 	USART_DMAEx_MultiBuffer_Init(&huart5, (uint32_t*)&usart5_dma_rxbuf[0], \
-							    (uint32_t*)&usart5_dma_rxbuf[1], USART5_RX_BUF_LEN); // ½ÓÊÕÍê±ÏºóÖØÆô
+							    (uint32_t*)&usart5_dma_rxbuf[1], USART5_RX_BUF_LEN); // æ¥æ”¶å®Œæ¯•åé‡å¯
 #endif
 }
 
@@ -272,20 +272,20 @@ static void uart_rx_idle_callback(UART_HandleTypeDef* huart)
 		/* handle dbus data dbus_buf from DMA */
 		USART1_rxDataHandler(usart1_dma_rxbuf);
 		memset(usart1_dma_rxbuf, 0, USART1_RX_BUF_LEN);
-		/* restart dma transmission */			
+		/* restart dma transmission */	  
 		__HAL_DMA_ENABLE(huart->hdmarx);		
 	}
 	
-	else if (huart == &huart7)	//imu_xrobotĞŞ¸Ä
+	else if (huart == &huart7)	//imu_xrobotä¿®æ”¹
 	{
 		/* clear DMA transfer complete flag */
 		__HAL_DMA_DISABLE(huart->hdmarx);
 		/* handle dbus data dbus_buf from DMA */
 		USART7_rxDataHandler(usart7_dma_rxbuf);
-		memset(usart7_dma_rxbuf, 0, USART7_RX_BUF_LEN);  //Çå¿Õ´®¿ÚDMA»º³åÇø
-		__HAL_DMA_SET_COUNTER(huart->hdmarx, USART7_RX_BUF_LEN); /*imu_xrobot ÈÃDMAÖØÖÃÊ±ÖØÖÃ¼ÆÊıÆ÷*/
+		memset(usart7_dma_rxbuf, 0, USART7_RX_BUF_LEN);  //æ¸…ç©ºä¸²å£DMAç¼“å†²åŒº
+		__HAL_DMA_SET_COUNTER(huart->hdmarx, USART7_RX_BUF_LEN); /*imu_xrobot è®©DMAé‡ç½®æ—¶é‡ç½®è®¡æ•°å™¨*/
 
-		/* ORE ·¢Éúºó USART Ó²¼ş»áÇå³ı CR3_DMAR£¬ĞèÖØĞÂÊ¹ÄÜ */
+		/* ORE å‘ç”Ÿå USART ç¡¬ä»¶ä¼šæ¸…é™¤ CR3_DMARï¼Œéœ€é‡æ–°ä½¿èƒ½ */
 		SET_BIT(huart->Instance->CR3, USART_CR3_DMAR);
 		__HAL_UART_CLEAR_FLAG(huart, UART_CLEAR_OREF);
 		__HAL_UART_CLEAR_IDLEFLAG(huart);
@@ -393,7 +393,7 @@ static HAL_StatusTypeDef DMA_Start(DMA_HandleTypeDef *hdma, \
   */
 void DRV_UART_IRQHandler(UART_HandleTypeDef *huart)
 {
-    // ÅĞ¶ÏÊÇ·ñÎª¿ÕÏĞÖĞ¶Ï
+    // åˆ¤æ–­æ˜¯å¦ä¸ºç©ºé—²ä¸­æ–­
 	if( __HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE) &&
 		__HAL_UART_GET_IT_SOURCE(huart, UART_IT_IDLE))
 	{
@@ -414,42 +414,42 @@ void WL_UART_printf(char *format, ...)
 
 /* rxData Handler [Weak] functions -------------------------------------------*/
 /**
- *	@brief	[__WEAK] ĞèÒªÔÚPotocol LayerÖĞÊµÏÖ¾ßÌåµÄ USART1 ´¦ÀíĞ­Òé
+ *	@brief	[__WEAK] éœ€è¦åœ¨Potocol Layerä¸­å®ç°å…·ä½“çš„ USART1 å¤„ç†åè®®
  */
 __WEAK void USART1_rxDataHandler(uint8_t *rxBuf)
 {	
 }
 
 /**
- *	@brief	[__WEAK] ĞèÒªÔÚPotocol LayerÖĞÊµÏÖ¾ßÌåµÄ USART7 ´¦ÀíĞ­Òé
+ *	@brief	[__WEAK] éœ€è¦åœ¨Potocol Layerä¸­å®ç°å…·ä½“çš„ USART7 å¤„ç†åè®®
  */
 __WEAK void USART7_rxDataHandler(uint8_t *rxBuf)
 {	
 }
 
 /**
- *	@brief	[__WEAK] ĞèÒªÔÚPotocol LayerÖĞÊµÏÖ¾ßÌåµÄ USART5 ´¦ÀíĞ­Òé
+ *	@brief	[__WEAK] éœ€è¦åœ¨Potocol Layerä¸­å®ç°å…·ä½“çš„ USART5 å¤„ç†åè®®
  */
 __WEAK void USART5_rxDataHandler(uint8_t *rxBuf)
 {	
 }
 
 /**
- *	@brief	[__WEAK] ĞèÒªÔÚPotocol LayerÖĞÊµÏÖ¾ßÌåµÄ USART10 ´¦ÀíĞ­Òé
+ *	@brief	[__WEAK] éœ€è¦åœ¨Potocol Layerä¸­å®ç°å…·ä½“çš„ USART10 å¤„ç†åè®®
  */
 __WEAK void USART10_rxDataHandler(uint8_t *rxBuf)
 {	
 }
 
 /**
- *	@brief	[__WEAK] ĞèÒªÔÚPotocol LayerÖĞÊµÏÖ¾ßÌåµÄ USART8 ´¦ÀíĞ­Òé
+ *	@brief	[__WEAK] éœ€è¦åœ¨Potocol Layerä¸­å®ç°å…·ä½“çš„ USART8 å¤„ç†åè®®
  */
 __WEAK void USART8_rxDataHandler(uint8_t *rxBuf)
 {	
 }
 
 /**
- *	@brief	[__WEAK] ĞèÒªÔÚPotocol LayerÖĞÊµÏÖ¾ßÌåµÄ USART9 ´¦ÀíĞ­Òé
+ *	@brief	[__WEAK] éœ€è¦åœ¨Potocol Layerä¸­å®ç°å…·ä½“çš„ USART9 å¤„ç†åè®®
  */
 __WEAK void USART9_rxDataHandler(uint8_t *rxBuf)
 {	
