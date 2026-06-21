@@ -276,16 +276,22 @@ static void uart_rx_idle_callback(UART_HandleTypeDef* huart)
 		__HAL_DMA_ENABLE(huart->hdmarx);		
 	}
 	
-	else if (huart == &huart7)
+	else if (huart == &huart7)	//imu_xrobot修改
 	{
 		/* clear DMA transfer complete flag */
 		__HAL_DMA_DISABLE(huart->hdmarx);
-		HAL_UART_Receive_DMA(&huart7, usart7_dma_rxbuf, USART7_RX_BUF_LEN);
 		/* handle dbus data dbus_buf from DMA */
 		USART7_rxDataHandler(usart7_dma_rxbuf);
-		//memset(usart7_dma_rxbuf, 0, USART7_RX_BUF_LEN);
-		/* restart dma transmission */	  
-		__HAL_DMA_ENABLE(huart->hdmarx);		
+		memset(usart7_dma_rxbuf, 0, USART7_RX_BUF_LEN);  //清空串口DMA缓冲区
+		__HAL_DMA_SET_COUNTER(huart->hdmarx, USART7_RX_BUF_LEN); /*imu_xrobot 让DMA重置时重置计数器*/
+
+		/* ORE 发生后 USART 硬件会清除 CR3_DMAR，需重新使能 */
+		SET_BIT(huart->Instance->CR3, USART_CR3_DMAR);
+		__HAL_UART_CLEAR_FLAG(huart, UART_CLEAR_OREF);
+		__HAL_UART_CLEAR_IDLEFLAG(huart);
+
+		/* restart dma transmission */
+		__HAL_DMA_ENABLE(huart->hdmarx);
 	}
 	
 	else if (huart == &huart8)
