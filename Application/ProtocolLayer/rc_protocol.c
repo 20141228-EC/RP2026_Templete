@@ -226,6 +226,7 @@ void keyboard_status_update(key_board_info_t *key)
     }
 }
 extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart5;
 static uint8_t init_cnt = 0;
 /**
  *	@brief	USART1 接收回调
@@ -233,6 +234,24 @@ static uint8_t init_cnt = 0;
 void USART1_rxDataHandler(uint8_t *rxBuf)
 {
 	if(rc_sensor.driver != NULL && rc_sensor.driver->huart == &huart1)
+	{
+		// 更新遥控数据
+		if(init_cnt != 0)
+			rc_sensor.info->offline_cnt = 0;
+		else
+			init_cnt ++;
+		rc_sensor.update(&rc_sensor, rxBuf);
+		rc_sensor.check(&rc_sensor);
+		
+		rc_interrupt_update(&rc_sensor);
+	}
+}
+/**
+ *	@brief	USART5 接收回调
+ */
+void USART5_rxDataHandler(uint8_t *rxBuf)
+{
+	if(rc_sensor.driver != NULL && rc_sensor.driver->huart == &huart5)
 	{
 		// 更新遥控数据
 		if(init_cnt != 0)
