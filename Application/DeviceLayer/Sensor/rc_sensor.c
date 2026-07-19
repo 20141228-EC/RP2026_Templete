@@ -9,7 +9,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "rc_sensor.h"
 #include "rp_math.h"
-#include "usart.h"
 
 extern void rc_sensor_init(rc_sensor_t *rc_sen);
 extern void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf);
@@ -25,13 +24,13 @@ static void rc_sensor_heart_beat(rc_sensor_t *rc_sen);
 /* Exported variables --------------------------------------------------------*/
 // 遥控器驱动
 drv_uart_t rc_sensor_driver = {
-	.huart = &huart6,
+	.id = DRV_UART3,
 	.tx_byte = NULL,
 };
 
 // 遥控器信息
 rc_sensor_info_t rc_sensor_info = {
-	// 拨轮跳变判断值
+	// 波轮跳变判断值
 	.tw_step_value[RC_TB_UP] = -600,
 	.tw_step_value[RC_TB_MU] = -200,
 	.tw_step_value[RC_TB_DN] = +600,
@@ -39,10 +38,9 @@ rc_sensor_info_t rc_sensor_info = {
 	.offline_max_cnt = 60,
 };
 
-// 遥控器传感器对象
+// 遥控器传感器
 rc_sensor_t rc_sensor = {
 	.info = &rc_sensor_info,
-	.driver = &rc_sensor_driver,
 	.init = rc_sensor_init,
 	.update = rc_sensor_update,
 	.check = rc_sensor_check,
@@ -53,27 +51,27 @@ rc_sensor_t rc_sensor = {
 
 /* Private functions ---------------------------------------------------------*/
 /**
- *	@brief	遥控器数据检测
- *  step[0]:上拨轮跳变到最大值
- *  step[1]:上拨轮跳变到下一个值
- *  step[2]:下拨轮跳变到最大值
- *  step[3]:下拨轮跳变到下一个值
- *  不知谁写的代码有问题，注释没有一个
+ *	@brief	遥控器数据检查
+ *  step[0]:拨轮推到顶跳变
+ *  step[1]:拨轮往上推一点跳变
+ *  step[2]:拨轮推到底跳变
+ *  step[3]:拨轮往下推一点跳变
+ *  不知道谁写的抽象玩意，注释没有一点
  */
 static void rc_sensor_check(rc_sensor_t *rc_sen)
 {
-	/*定义变量----------------------------------------------------------------*/
-	static int16_t thumbwheel_record = 0;	// 拨轮记录上拨轮最大值
-	static uint8_t thumbwheel_last_step[4]; // 拨轮记录上一次跳变值
+	/*波轮跳变----------------------------------------------------------------*/
+	static int16_t thumbwheel_record = 0;	// 用来记录最大拨到多少的
+	static uint8_t thumbwheel_last_step[4]; // 用来记录上一次跳变的值
 	rc_sensor_info_t *rc_info = rc_sen->info;
 
-	/* 记录拨轮最大值*/
+	/* 更新最大波轮值*/
 	if ((abs(rc_info->thumbwheel.value_last) < abs(rc_info->thumbwheel.value)) &&
 		(abs(thumbwheel_record) < abs(rc_info->thumbwheel.value)))
 	{
 		thumbwheel_record = rc_info->thumbwheel.value;
 	}
-	/*只有拨轮通过中间值才更新跳变值*/
+	/*拨轮回正后通过最大波轮值来跳变*/
 	if ((abs(rc_info->thumbwheel.value) <=10) && (thumbwheel_record != 0))
 	{
 		for (char i = 0; i < 4; i++)
@@ -97,7 +95,7 @@ static void rc_sensor_check(rc_sensor_t *rc_sen)
 		}
 		thumbwheel_record = 0;
 	}
-	/*记录拨轮跳变值*/
+	/*波轮上升沿赋值*/
 	for (uint8_t i = 0; i < 4; i++)
 	{
 		if (thumbwheel_last_step[i] != rc_info->thumbwheel.step[i])
@@ -113,7 +111,7 @@ static void rc_sensor_check(rc_sensor_t *rc_sen)
 
 	rc_info->thumbwheel.value_last = rc_info->thumbwheel.value;
 
-	/*开关检测----------------------------------------------------*/
+	/*拨杆跳变----------------------------------------------------*/
 	/* 左拨杆判断 */
 	if (rc_sen->info->s1.value != rc_sen->info->s1.value_last)
 	{
@@ -190,7 +188,7 @@ static void rc_sensor_check(rc_sensor_t *rc_sen)
 }
 
 /**
- *	@brief	遥控器心跳函数
+ *	@brief	遥控器心跳包
  */
 static void rc_sensor_heart_beat(rc_sensor_t *rc_sen)
 {
@@ -227,12 +225,12 @@ bool RC_IsChannelReset(void)
 
 void RC_ResetData(rc_sensor_t *rc)
 {
-	// 通道值强制设置成中间值(模拟遥控器摇杆的状态)
+	// 通道值强行设置成中间值(不拨动摇杆的状态)
 	rc->info->ch0 = 0;
 	rc->info->ch1 = 0;
 	rc->info->ch2 = 0;
 	rc->info->ch3 = 0;
-	// 左右开关选择强制设置成中间值状态
+	// 左右开关选择强行设置成中间值状态
 	rc->info->s1.value = RC_SW_MID;
 	rc->info->s2.value = RC_SW_MID;
 	// 鼠标
@@ -244,12 +242,6 @@ void RC_ResetData(rc_sensor_t *rc)
 	rc->info->mouse_z = 0.f;
 	rc->info->mouse_btn_l.value = 0;
 	rc->info->mouse_btn_r.value = 0;
-	rc->info->mouse_btn_m.value = 0;
-	// VT13
-	rc->info->stop = 0;
-	rc->info->left_button = 0;
-	rc->info->right_button = 0;
-	rc->info->shutter = 0;
 	// 键盘
 	rc->info->key_v = 0;
 	rc->info->W.value = 0;
@@ -268,7 +260,7 @@ void RC_ResetData(rc_sensor_t *rc)
 	rc->info->C.value = 0;
 	rc->info->V.value = 0;
 	rc->info->B.value = 0;
-	// 拨轮
+	// 左拨轮
 	rc->info->thumbwheel.value = 0;
 	rc->info->thumbwheel.value_last = 0;
 	rc->info->thumbwheel.step[RC_TB_UP] = 0;

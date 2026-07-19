@@ -1,3 +1,4 @@
+
 /* Includes ------------------------------------------------------------------*/
 #include "rc_protocol.h"
 #include "rp_math.h"
@@ -33,7 +34,7 @@ void rc_sensor_init(rc_sensor_t *rc_sen)
 }
 
 /**
-  * @brief  设置按键判定时间上限
+  * @brief  按键长按时间设置
   */
 void keyboard_cnt_max_set(rc_sensor_t *rc_sen)
 {
@@ -60,7 +61,7 @@ void keyboard_cnt_max_set(rc_sensor_t *rc_sen)
 }
 
 /**
-  * @brief  遥控数据更新
+  * @brief  鼠标数据更新
   */
 void rc_interrupt_update(rc_sensor_t *rc_sen)
 {
@@ -104,26 +105,18 @@ void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf)
 
 	rc_info->s1.value = ((rxBuf[5] >> 4) & 0x000C) >> 2;
 	rc_info->s2.value = (rxBuf[5] >> 4) & 0x0003;	
-	/*遥控器右杆下位修正*/
+	/*遥控器限位置零*/
 	if(rc_sensor.info->ch3== -660)
 	{
 		rc_sensor.info->ch3=0;
 	}
 
-	/* 鼠标 */
+	/* 键鼠 */
 	rc_info->mouse_vx = rxBuf[6]  | (rxBuf[7 ] << 8);
 	rc_info->mouse_vy = rxBuf[8]  | (rxBuf[9 ] << 8);
 	rc_info->mouse_vz = rxBuf[10] | (rxBuf[11] << 8);
   rc_info->mouse_btn_l.value = rxBuf[12] & 0x01;
   rc_info->mouse_btn_r.value = rxBuf[13] & 0x01;
-	rc_info->mouse_btn_m.value = 0;
-	
-	/* VT13特定字段置零 */
-	rc_info->stop = 0;
-	rc_info->left_button = 0;
-	rc_info->right_button = 0;
-	rc_info->shutter = 0;
-	
 	rc_info->key_v   =  rxBuf[14] | (rxBuf[15] << 8);
 	
   rc_info->W.value = 	KEY_PRESSED_W;
@@ -151,13 +144,12 @@ void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf)
 }
 
 /**
- *	@brief	更新按键状态
+ *	@brief	更新键盘状态
  */
 void keyboard_update(rc_sensor_info_t	*info)
 {
   keyboard_status_update(&info->mouse_btn_l);
   keyboard_status_update(&info->mouse_btn_r);
-  keyboard_status_update(&info->mouse_btn_m);
   keyboard_status_update(&info->Q);
   keyboard_status_update(&info->W);
   keyboard_status_update(&info->E);
@@ -177,7 +169,7 @@ void keyboard_update(rc_sensor_info_t	*info)
 }
 
 /**
- *	@brief	更新按键按下状态
+ *	@brief	更新键盘按键状态
  *  release -> release_to_press -> short_press -> long_press -> press_to_release
  */
 void keyboard_status_update(key_board_info_t *key)
@@ -219,3 +211,4 @@ void keyboard_status_update(key_board_info_t *key)
         } 
     }
 }
+ 
