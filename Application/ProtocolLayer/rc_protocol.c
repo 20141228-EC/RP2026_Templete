@@ -12,6 +12,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "rc_protocol.h"
 #include "rp_math.h"
+#include "VT13_rc_ctrl.h"
 
 #include "rc_sensor.h"
 
