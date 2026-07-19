@@ -9,9 +9,9 @@
 #define configDRV_CAN_USE_MAIL  1
 
 /* Exported types ------------------------------------------------------------*/
-/* ?????? --------------------------------------------------------------------*/
+/* 驱动层 --------------------------------------------------------------------*/
 /**
- *	@brief	????????
+ *	@brief	驱动类型
  *	@class	driver
  */
 typedef enum drv_type{
@@ -23,7 +23,7 @@ typedef enum drv_type{
 } drv_type_t;
 
 /**
- *	@brief	can???? id
+ *	@brief	can驱动 id
  *	@class	driver
  */
 typedef enum {
@@ -32,7 +32,7 @@ typedef enum {
 } can_id_t;
 
 /**
- *	@brief	iic???? id
+ *	@brief	iic驱动 id
  *	@class	driver
  */
 typedef enum {
@@ -40,7 +40,7 @@ typedef enum {
 } iic_id_t;
 
 /**
- *	@brief	spi???? id
+ *	@brief	spi驱动 id
  *	@class	driver
  */
 typedef enum {
@@ -48,7 +48,7 @@ typedef enum {
 } spi_id_t;
 
 /**
- *	@brief	uart???? id
+ *	@brief	uart驱动 id
  *	@class	driver
  */
 typedef enum {
@@ -61,7 +61,7 @@ typedef enum {
 } uart_id_t;
 
 /**
- *	@brief	iic????
+ *	@brief	iic驱动
  *	@class	driver
  */
 typedef struct drv_iic {
@@ -70,21 +70,21 @@ typedef struct drv_iic {
 } drv_iic_t;
 
 /**
- *	@brief	can????
+ *	@brief	can驱动
  *	@class	driver
  */
 typedef struct drv_can {
-    can_id_t    can_id;				// CAN1??CAN2
+    can_id_t    can_id;				// CAN1或CAN2
     uint32_t    err_cnt;
-	uint32_t	rx_id;  		// ????????????
-	uint32_t	tx_id;  		// ???????????
-	uint8_t		data_id;		// ?????±?
-    uint16_t    tx_period;  	// ?????????(ms)
-	uint8_t		*CANx_XXX_DATA; // ?????????
+	uint32_t	rx_id;  		// 反馈报文标识符
+	uint32_t	tx_id;  		// 上传报文标识符
+	uint8_t		data_id;		// 数据下标
+    uint16_t    tx_period;  	// 定时发送间隔(ms)
+	uint8_t		*CANx_XXX_DATA; // 发送的数组
 } drv_can_t;
 
 /**
- *	@brief	pwm????
+ *	@brief	pwm驱动
  *	@class	driver
  */
 typedef struct drv_pwm {
@@ -93,13 +93,12 @@ typedef struct drv_pwm {
 } drv_pwm_t;
 
 /**
- *	@brief	uart????
+ *	@brief	uart驱动
  *	@class	driver
  */
 typedef struct drv_uart {
 		drv_type_t	type;
     uart_id_t   id;
-	    UART_HandleTypeDef *huart;
 		void				(*tx_byte)(struct drv_uart *self, uint8_t byte);
 } drv_uart_t;
 

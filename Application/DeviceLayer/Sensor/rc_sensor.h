@@ -47,8 +47,8 @@
 #define    KEY_PRESSED_OFFSET_V        ((uint16_t)0x01<<14)
 #define    KEY_PRESSED_OFFSET_B        ((uint16_t)0x01<<15)
 
-/* 按键按下判定时间 */
-#define MOUSE_BTN_L_CNT_MAX     833         //ms 鼠标左键前频率
+/* 检测按键长按时间 */
+#define MOUSE_BTN_L_CNT_MAX     833         //ms 鼠标左键，前哨频率
 #define MOUSE_BTN_R_CNT_MAX     500         //ms 鼠标右键
 #define KEY_Q_CNT_MAX           500         //ms Q键
 #define KEY_W_CNT_MAX           400		//ms W键
@@ -67,8 +67,8 @@
 #define KEY_SHIFT_CNT_MAX       500         //ms SHIFT键
 #define KEY_CTRL_CNT_MAX        2500        //ms CTRL键
 
-/* 平滑滤波参数 */
-#define REMOTE_SMOOTH_TIMES     10          //遥控平滑滤波参数
+/* 平滑滤波次数 */
+#define REMOTE_SMOOTH_TIMES     10          //鼠标平滑滤波次数
 
 /* ----------------------- Function Definition-------------------------------- */
 /* 遥控摇杆通道偏移值 */
@@ -80,7 +80,7 @@
 #define		RC_RIGH_CH_UD_VALUE			(rc_sensor_info.ch1)
 #define		RC_THUMB_WHEEL_VALUE		(rc_sensor_info.thumbwheel)
 
-/* 判断遥控开关拨动状态 */
+/* 检测遥控器开关状态 */
 #define    IF_RC_SW1_UP      (rc_sensor_info.s1.value == RC_SW_UP)
 #define    IF_RC_SW1_MID     (rc_sensor_info.s1.value == RC_SW_MID)
 #define    IF_RC_SW1_DOWN    (rc_sensor_info.s1.value == RC_SW_DOWN)
@@ -88,19 +88,19 @@
 #define    IF_RC_SW2_MID     (rc_sensor_info.s2.value == RC_SW_MID)
 #define    IF_RC_SW2_DOWN    (rc_sensor_info.s2.value == RC_SW_DOWN)
 
-/* 获取鼠标移动速度 */
+/* 获取鼠标三轴的移动速度 */
 #define    MOUSE_X_MOVE_SPEED    (rc_sensor_info.mouse_vx)
 #define    MOUSE_Y_MOVE_SPEED    (rc_sensor_info.mouse_vy)
 #define    MOUSE_Z_MOVE_SPEED    (rc_sensor_info.mouse_vz)
 
-/* 获取鼠标按键状态 
-   按下为1没按下为0*/
+/* 检测鼠标按键状态 
+   按下为1，没按下为0*/
 #define    MOUSE_PRESSED_LEFT    (rc_sensor_info.mouse_btn_l==1)
 #define    MOUSE_PRESSED_RIGH    (rc_sensor_info.mouse_btn_r==1)
 
 
-/* 获取键盘按键状态 
-   对应按键按下，逻辑表达式值为1，否则为0 */
+/* 检测键盘按键状态 
+   若对应按键被按下，则逻辑表达式的值为1，否则为0 */
 #define    KEY_PRESSED         (  rc_sensor_info.key_v  )
 #define    KEY_PRESSED_W       ( (rc_sensor_info.key_v & KEY_PRESSED_OFFSET_W)    != 0 )
 #define    KEY_PRESSED_S       ( (rc_sensor_info.key_v & KEY_PRESSED_OFFSET_S)    != 0 )
@@ -123,7 +123,7 @@
 /* 按键状态枚举 */
 typedef enum
 {
-  release,              //松开
+  release,              //放松
   release_to_press,     //下降沿
   short_press,          //短按
   long_press,           //长按
@@ -134,16 +134,16 @@ typedef enum
 typedef struct key_board_info_struct {
   uint8_t			  value; 			//值
   key_board_status_e status;            //状态
-  key_board_status_e last_status;       //上一状态
+  key_board_status_e last_status;       //上一次状态
 	
   int16_t cnt;                          //当前计数
   int16_t cnt_max;                      //计数上限
 }key_board_info_t;
 
-/* 开关信息 */
+/* 拨杆信息 */
 typedef struct
 {
-  uint8_t value_last;  //上一值
+  uint8_t value_last;  //上一次值
   uint8_t value;       //新值
   uint8_t status;      //状态
 }remote_switch_info_t;
@@ -151,20 +151,20 @@ typedef struct
 /* 拨轮信息 */
 typedef struct
 {
-  int16_t value_last;   //上一值
+  int16_t value_last;   //上一次值
   int16_t value;        //新值
-  uint8_t step[4];      //步进值0变1，1变0
-  uint8_t step_rising_trigger[4]; //步进上升沿为1
+  uint8_t step[4];      //波轮跳变从0变1或1到0
+  uint8_t step_rising_trigger[4]; //波轮跳变瞬间为1
 	
 }thumbwheel_info_t;
 
-/* 遥控开关状态枚举 */
+/* 遥控器拨杆状态枚举 */
 typedef enum 
 {
   keep_R,         //保持
-  up_R,           //上升沿
-  mid_R,          //中位沿
-  down_R,         //下降沿
+  up_R,           //向上拨
+  mid_R,          //向中拨
+  down_R,         //向下拨
 }remote_status_e;
 
 typedef struct rc_sensor_info_struct {
@@ -188,14 +188,6 @@ typedef struct rc_sensor_info_struct {
   float                   mouse_z;          	  //鼠标z轴滤波后速度
   key_board_info_t        mouse_btn_l;          //鼠标左键
   key_board_info_t        mouse_btn_r;          //鼠标右键
-  key_board_info_t        mouse_btn_m;          //鼠标中键
-  
-  /* VT13特定字段 */
-  uint8_t                 stop;                 //停止按钮
-  uint8_t                 left_button;          //左按钮
-  uint8_t                 right_button;         //右按钮
-  uint8_t                 shutter;              //扳机
-  
   key_board_info_t        Q;                    //按键Q
   key_board_info_t        W;                    //按键W
   key_board_info_t        E;                    //按键E

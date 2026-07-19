@@ -10,7 +10,7 @@
       <TargetName>My_C</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
+      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\Version5.06</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -564,6 +564,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\DeviceLayer\Sensor\imu_sensor.c</FilePath>
             </File>
+            <File>
+              <FileName>imu_xrobot.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\DeviceLayer\imu_xrobot.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -633,16 +638,6 @@
               <FileName>rc_protocol.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\ProtocolLayer\rc_protocol.c</FilePath>
-            </File>
-            <File>
-              <FileName>VT13_rc_ctrl.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\ProtocolLayer\VT13_rc_ctrl.c</FilePath>
-            </File>
-            <File>
-              <FileName>VT13_rc_ctrl.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Application\ProtocolLayer\VT13_rc_ctrl.h</FilePath>
             </File>
           </Files>
         </Group>
