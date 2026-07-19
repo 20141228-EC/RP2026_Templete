@@ -25,9 +25,7 @@ static void rc_sensor_heart_beat(rc_sensor_t *rc_sen);
 /* Exported variables --------------------------------------------------------*/
 // Ò£¿ØÆ÷Çý¶¯
 drv_uart_t rc_sensor_driver = {
-	.type = DRV_TYPE_UART,
-	.id = DRV_UART6,
-	.huart = &huart6,
+	.huart = &huart3,
 	.tx_byte = NULL,
 };
 

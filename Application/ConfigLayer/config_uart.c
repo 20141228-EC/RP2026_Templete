@@ -4,19 +4,6 @@
 #include "rc_protocol.h"
 #include "usart.h"
 
-void USART1_rxDataHandler(uint8_t *rxBuf)
-{
-	if (rc_sensor.driver != NULL && rc_sensor.driver->huart == &huart1)
-	{
-		#if (RC_TYPE == 0)
-		rc_sensor.update(&rc_sensor, rxBuf);
-		#elif (RC_TYPE == 1)
-		VT13_to_rc(rxBuf, &rc_sensor_info);
-		#endif
-		rc_sensor.check(&rc_sensor);
-	}
-}
-
 void USART3_rxDataHandler(uint8_t *rxBuf)
 {
 	if (rc_sensor.driver != NULL && rc_sensor.driver->huart == &huart3)
