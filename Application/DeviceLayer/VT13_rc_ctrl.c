@@ -26,8 +26,8 @@ void VT13_to_rc(uint8_t *VT13_buf, rc_sensor_info_t *rc_info)
         rc_info->ch2 = (((VT13_buf[4] >> 6) | (VT13_buf[5] << 2) | (VT13_buf[6] << 10)) & 0x07FF) - 1024;
         rc_info->ch3 = (((VT13_buf[6] >> 1) | (VT13_buf[7] << 7)) & 0x07FF) - 1024;
 
-        rc_info->s1.value = (VT13_buf[7] >> 4) & 0x03;
-        rc_info->s2.value = RC_SW_MID;
+        rc_info->s1 = (VT13_buf[7] >> 4) & 0x03;
+        rc_info->s2 = RC_SW_MID;
         rc_info->stop = (VT13_buf[7] >> 6) & 0x01;
         rc_info->left_button = (VT13_buf[7] >> 7) & 0x01;
         rc_info->right_button = VT13_buf[8] & 0x01;
