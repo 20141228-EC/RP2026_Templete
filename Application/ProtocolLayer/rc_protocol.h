@@ -15,12 +15,16 @@
 /* Includes ------------------------------------------------------------------*/
 #include "rp_config.h"
 #include "rc_sensor.h"
+#include "VT13_rc_ctrl.h"
 
 /* Exported macro ------------------------------------------------------------*/
+#define RC_TYPE 0   // 0: ¾ÉÒ£¿ØÆ÷, 1: VT13Ò£¿ØÆ÷
+
 /* Exported types ------------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 void keyboard_update(rc_sensor_info_t *info);
 void rc_interrupt_update(rc_sensor_t *rc_sen);
 void rc_sensor_init(rc_sensor_t *rc_sen);
+void VT13_to_rc(uint8_t *VT13_buf, rc_sensor_info_t *rc_info);
 
 #endif

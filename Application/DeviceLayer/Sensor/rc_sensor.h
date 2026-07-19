@@ -188,6 +188,14 @@ typedef struct rc_sensor_info_struct {
   float                   mouse_z;          	  //鼠标z轴滤波后速度
   key_board_info_t        mouse_btn_l;          //鼠标左键
   key_board_info_t        mouse_btn_r;          //鼠标右键
+  key_board_info_t        mouse_btn_m;          //鼠标中键
+  
+  /* VT13特定字段 */
+  uint8_t                 stop;                 //停止按钮
+  uint8_t                 left_button;          //左按钮
+  uint8_t                 right_button;         //右按钮
+  uint8_t                 shutter;              //扳机
+  
   key_board_info_t        Q;                    //按键Q
   key_board_info_t        W;                    //按键W
   key_board_info_t        E;                    //按键E

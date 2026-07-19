@@ -9,6 +9,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "rc_sensor.h"
 #include "rp_math.h"
+#include "usart.h"
 
 extern void rc_sensor_init(rc_sensor_t *rc_sen);
 extern void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf);
@@ -24,13 +25,13 @@ static void rc_sensor_heart_beat(rc_sensor_t *rc_sen);
 /* Exported variables --------------------------------------------------------*/
 // Ò£¿ØÆ÷Çý¶¯
 drv_uart_t rc_sensor_driver = {
-	.id = DRV_UART3,
+	.huart = &huart3,
 	.tx_byte = NULL,
 };
 
 // Ò£¿ØÆ÷ÐÅÏ¢
 rc_sensor_info_t rc_sensor_info = {
-	// ²¨ÂÖÌø±äÅÐ¶ÏÖµ
+	// ²¦ÂÖÌø±äÅÐ¶ÏÖµ
 	.tw_step_value[RC_TB_UP] = -600,
 	.tw_step_value[RC_TB_MU] = -200,
 	.tw_step_value[RC_TB_DN] = +600,
@@ -41,6 +42,7 @@ rc_sensor_info_t rc_sensor_info = {
 // Ò£¿ØÆ÷´«¸ÐÆ÷
 rc_sensor_t rc_sensor = {
 	.info = &rc_sensor_info,
+	.driver = &rc_sensor_driver,
 	.init = rc_sensor_init,
 	.update = rc_sensor_update,
 	.check = rc_sensor_check,
@@ -242,6 +244,12 @@ void RC_ResetData(rc_sensor_t *rc)
 	rc->info->mouse_z = 0.f;
 	rc->info->mouse_btn_l.value = 0;
 	rc->info->mouse_btn_r.value = 0;
+	rc->info->mouse_btn_m.value = 0;
+	// VT13
+	rc->info->stop = 0;
+	rc->info->left_button = 0;
+	rc->info->right_button = 0;
+	rc->info->shutter = 0;
 	// ¼üÅÌ
 	rc->info->key_v = 0;
 	rc->info->W.value = 0;

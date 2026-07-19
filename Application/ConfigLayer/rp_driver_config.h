@@ -97,8 +97,7 @@ typedef struct drv_pwm {
  *	@class	driver
  */
 typedef struct drv_uart {
-		drv_type_t	type;
-    uart_id_t   id;
+		UART_HandleTypeDef *huart;
 		void				(*tx_byte)(struct drv_uart *self, uint8_t byte);
 } drv_uart_t;
 
