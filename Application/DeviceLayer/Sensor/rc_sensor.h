@@ -52,6 +52,7 @@
 /* 检测按键长按时间 */
 #define MOUSE_BTN_L_CNT_MAX     500         //ms 鼠标左键
 #define MOUSE_BTN_R_CNT_MAX     500         //ms 鼠标右键
+#define MOUSE_BTN_M_CNT_MAX     500         //ms 鼠标中键
 #define KEY_Q_CNT_MAX           500         //ms Q键
 #define KEY_W_CNT_MAX           1800		//ms W键
 #define KEY_E_CNT_MAX           500         //ms E键
@@ -100,6 +101,7 @@
    按下为1，没按下为0*/
 #define    MOUSE_PRESSED_LEFT    (rc_sensor_info.mouse_btn_l == 1)
 #define    MOUSE_PRESSED_RIGH    (rc_sensor_info.mouse_btn_r == 1)
+#define    MOUSE_PRESSED_MIDDLE  (rc_sensor_info.mouse_btn_m == 1)
 
 
 /* 检测键盘按键状态 
@@ -173,6 +175,7 @@ typedef struct rc_sensor_info_struct {
   float                   mouse_z;          	  //鼠标z轴滤波后速度
   key_board_info_t        mouse_btn_l;          //鼠标左键
   key_board_info_t        mouse_btn_r;          //鼠标右键
+  key_board_info_t        mouse_btn_m;          //鼠标中键
   key_board_info_t        Q;                    //按键Q
   key_board_info_t        W;                    //按键W
   key_board_info_t        E;                    //按键E
@@ -189,6 +192,10 @@ typedef struct rc_sensor_info_struct {
   key_board_info_t        B;                    //按键B
   key_board_info_t        Shift;                //按键Shift
   key_board_info_t        Ctrl;                 //按键Ctrl
+	uint8_t					stop;					//VT13急停
+	uint8_t					left_button;			//VT13左按键
+	uint8_t					right_button;			//VT13右按键
+	uint8_t					shutter;				//VT13拍照键
 	uint16_t								key_v;
 	
 	int16_t		offline_cnt;

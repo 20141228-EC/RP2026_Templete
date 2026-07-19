@@ -27,6 +27,7 @@ JLinkLog.txt
 JLinkSettings.ini
 *.ini
 *.cdb
+*.uvguix.*
 
 # 目录忽略（编译生成的中间文件夹）
 Objects/

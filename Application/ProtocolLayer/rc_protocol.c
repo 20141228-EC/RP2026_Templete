@@ -12,6 +12,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "rc_protocol.h"
 #include "rp_math.h"
+#include "VT13_rc_ctrl.h"
 
 #include "rc_sensor.h"
 
@@ -52,6 +53,7 @@ void keyboard_cnt_max_set(rc_sensor_t *rc_sen)
 	
   info->mouse_btn_l.cnt_max = MOUSE_BTN_L_CNT_MAX;
   info->mouse_btn_r.cnt_max = MOUSE_BTN_R_CNT_MAX;
+  info->mouse_btn_m.cnt_max = MOUSE_BTN_M_CNT_MAX;
   info->Q.cnt_max = KEY_Q_CNT_MAX;
   info->W.cnt_max = KEY_W_CNT_MAX;
   info->E.cnt_max = KEY_E_CNT_MAX;
@@ -98,6 +100,7 @@ void rc_interrupt_update(rc_sensor_t *rc_sen)
 void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf)
 {
 	rc_sensor_info_t *rc_info = rc_sen->info;
+#if RC_TYPE == 0
 	/* 遥控器 */
 	rc_info->ch0 = (rxBuf[0] | rxBuf[1] << 8) & 0x07FF;
 	rc_info->ch0 -= 1024;
@@ -142,6 +145,9 @@ void rc_sensor_update(rc_sensor_t *rc_sen, uint8_t *rxBuf)
   rc_info->C.value = 	KEY_PRESSED_C;
   rc_info->V.value = 	KEY_PRESSED_V;
   rc_info->B.value = 	KEY_PRESSED_B;
+#else
+	VT13_to_rc(rxBuf, rc_info);
+#endif
 	
 	tt1 = tt2;
 	tt2 = micros();
@@ -156,6 +162,7 @@ void keyboard_update(rc_sensor_info_t	*info)
 {
   keyboard_status_update(&info->mouse_btn_l);
   keyboard_status_update(&info->mouse_btn_r);
+  keyboard_status_update(&info->mouse_btn_m);
   keyboard_status_update(&info->Q);
   keyboard_status_update(&info->W);
   keyboard_status_update(&info->E);
@@ -218,20 +225,42 @@ void keyboard_status_update(key_board_info_t *key)
         } 
     }
 }
+extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart5;
 static uint8_t init_cnt = 0;
 /**
- *	@brief	在串口2中解析遥控数据协议
+ *	@brief	USART1 接收回调
+ */
+void USART1_rxDataHandler(uint8_t *rxBuf)
+{
+	if(rc_sensor.driver != NULL && rc_sensor.driver->huart == &huart1)
+	{
+		// 更新遥控数据
+		if(init_cnt != 0)
+			rc_sensor.info->offline_cnt = 0;
+		else
+			init_cnt ++;
+		rc_sensor.update(&rc_sensor, rxBuf);
+		rc_sensor.check(&rc_sensor);
+		
+		rc_interrupt_update(&rc_sensor);
+	}
+}
+/**
+ *	@brief	USART5 接收回调
  */
 void USART5_rxDataHandler(uint8_t *rxBuf)
 {
-	// 更新遥控数据
-	if(init_cnt != 0)
-	rc_sensor.info->offline_cnt = 0;
-	else
-	init_cnt ++;
-	rc_sensor.update(&rc_sensor, rxBuf);
-	rc_sensor.check(&rc_sensor);
-	
-	rc_interrupt_update(&rc_sensor);
-	
+	if(rc_sensor.driver != NULL && rc_sensor.driver->huart == &huart5)
+	{
+		// 更新遥控数据
+		if(init_cnt != 0)
+			rc_sensor.info->offline_cnt = 0;
+		else
+			init_cnt ++;
+		rc_sensor.update(&rc_sensor, rxBuf);
+		rc_sensor.check(&rc_sensor);
+		
+		rc_interrupt_update(&rc_sensor);
+	}
 }
